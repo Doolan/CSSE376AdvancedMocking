@@ -53,10 +53,9 @@ namespace CommandClientVisualStudioTest
                 fakeStream.Flush();
             }
             mocks.ReplayAll();
-            CMDClient client = new CMDClient(null, "Bogus network name");
+            CMDClient client = new CMDClient(null, "Bogus network name");            
             
-            // we need to set the private variable here
-
+            typeof(CMDClient).GetField("networkStream", BindingFlags.NonPublic | BindingFlags.Instance).SetValue(client, fakeStream);
             client.SendCommandToServerUnthreaded(command);
             mocks.VerifyAll();
             
@@ -65,12 +64,34 @@ namespace CommandClientVisualStudioTest
         [TestMethod]
         public void TestUserExitCommandWithoutMocks()
         {
-            Assert.Fail("Not yet implemented");
+            IPAddress ipaddress = IPAddress.Parse("127.0.0.1");
+            Command command = new Command(CommandType.UserExit, ipaddress, null);
+            System.IO.Stream fakeStream = new MemoryStream();
+
+            CMDClient client = new CMDClient(null, "Bogus network name");
+
+            typeof(CMDClient).GetField("networkStream", BindingFlags.NonPublic | BindingFlags.Instance).SetValue(client, fakeStream);
+            client.SendCommandToServerUnthreaded(command);
+            Console.Out.Write(Convert.ToString(((MemoryStream) fakeStream).GetBuffer()));
         }
 
         [TestMethod]
         public void TestSemaphoreReleaseOnNormalOperation()
         {
+            IPAddress ipaddress = IPAddress.Parse("127.0.0.1");
+            Command command = new Command(CommandType.UserExit, ipaddress, null);
+            
+            CMDClient client = new CMDClient(null, "Bogus network name");
+
+            //mocking
+            System.IO.Stream fakeStream = new MemoryStream();
+            typeof(CMDClient).GetField("networkStream", BindingFlags.NonPublic | BindingFlags.Instance).SetValue(client, fakeStream);
+
+
+
+            client.SendCommandToServerUnthreaded(command);
+
+
             Assert.Fail("Not yet implemented");
         }
 
